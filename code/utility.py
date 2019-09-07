@@ -5,9 +5,6 @@ import os
 import requests
 
 
-root_dir = None
-
-
 class VmanageHttpSession:
     def __init__(self, host, username, password):
         # Default session parameters
@@ -80,11 +77,8 @@ class VmanageHttpSession:
 
 
 def get_root_dir():
-    global root_dir
-
     try:
-        if not root_dir:
-            root_dir = os.path.dirname(os.path.dirname(__file__))
+        root_dir = os.path.dirname(os.path.dirname(__file__))
     except:
         raise RuntimeError('Failed to get the root directory')
     else:
