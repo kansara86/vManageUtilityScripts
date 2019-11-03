@@ -31,3 +31,5 @@ If you have questions, concerns, bug reports, etc., please create an issue again
 ## Getting involved
 
 If you want to extend the scripts beyond feature templates, please push the changes to this repository in a new branch and create a Pull Request. Changes will be reviewed and then merged to develop branch
+
+[![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/kansara86/vManageUtilityScripts)
