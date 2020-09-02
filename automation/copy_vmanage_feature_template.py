@@ -4,22 +4,24 @@ import argparse
 import configparser
 import json
 import os
-from code import utility
+from automation import logger, utility
 
 
-def get_feature_templates(session):
+log = logger.Log(__name__)
+
+
+def get_feature_template_list(session):
     url = '/dataservice/template/feature'
 
     try:
         response = session.rest_api_call('GET', url)
     except:
-        raise RuntimeError('Error in getting feature templates')
+        raise RuntimeError('Error in getting feature template list')
     else:
-        if response and 'data' in response and len(response['data']) > 0:
-            feature_template_list = response['data']
-            return {template_entry['templateName']: template_entry for template_entry in feature_template_list}
+        if response and 'data' in response:
+            return response['data']
         else:
-            return {}
+            return None
 
 
 def create_feature_template(session, config_template_dict):
@@ -50,12 +52,8 @@ def create_feature_template(session, config_template_dict):
             return None
 
 
-def main(name):
-    template_name = name.template
-
-    if not template_name:
-        raise RuntimeError('Template name not provided')
-
+@log.log_this
+def main(args):
     try:
         config = configparser.ConfigParser()
         config_file = os.path.join(utility.get_root_dir(), 'config.ini')
@@ -74,35 +72,33 @@ def main(name):
     except:
         return RuntimeError('Error in contacting vManage(s)')
     else:
-        src_templates = get_feature_templates(src_sess)
-        if not src_templates:
-            raise RuntimeError(f'No feature templates found in source vManage {src_host}')
+        template_list = get_feature_template_list(src_sess)
+        if not template_list:
+            raise RuntimeError('No feature templates found in source vManage')
 
-        if template_name not in src_templates:
-            raise RuntimeError(f'No feature template found with template name {template_name} in source vManage'
-                               f' {src_host}')
-
-        dest_templates = get_feature_templates(dest_sess)
-        if template_name in dest_templates:
-            raise RuntimeError(f'Feature template with template name {template_name} already exists in destination'
-                               f' vManage {dest_host}')
-
+        config_template = {}
         try:
-            config_template = src_templates[template_name]
-            resp = create_feature_template(dest_sess, config_template)
+            found = False
+            for template_entry in template_list:
+                if template_entry['templateName'] == args.template:
+                    config_template = template_entry
+                    found = True
+                    break
         except:
-            raise
+            raise RuntimeError('templateName key not found in feature template list')
         else:
+            if not found:
+                raise RuntimeError(f'No feature template found with the template name {args.template}')
+
+            resp = create_feature_template(dest_sess, config_template)
             if not resp:
-                raise RuntimeError(f'Feature template creation with template name {template_name} failed in destination'
-                                   f' vManage {dest_host}')
+                raise RuntimeError('Template not created successfully in destination vManage')
             else:
-                print(f'Feature template {template_name} copied successfully from source vManage {src_host} to'
-                      f' destination vManage {dest_host}')
+                print(f'Feature template {args.template} copied successfully')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-template', '--template', help='vManage feature template name', type=str)
-    temp_args = parser.parse_args()
-    main(temp_args)
+    args = parser.parse_args()
+    main(args)
