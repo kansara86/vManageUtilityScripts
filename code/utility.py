@@ -83,3 +83,13 @@ def get_root_dir():
         raise RuntimeError('Failed to get the root directory')
     else:
         return root_dir
+
+
+def convert_yaml_to_dict(yaml_file):
+    try:
+        with open(yaml_file) as f:
+            data_dict = yaml.load(f)
+    except:
+        raise RuntimeError('Error converting {} file to dictionary'.format(yaml_file))
+
+    return data_dict
