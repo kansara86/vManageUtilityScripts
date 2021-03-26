@@ -16,7 +16,7 @@ pyaml==19.4.1
 pyparsing==2.4.0
 pytest==4.6.4
 pytest-cov==2.7.1
-PyYAML==5.1.1
+PyYAML==5.4
 requests==2.22.0
 scandir==1.10.0
 six==1.12.0
